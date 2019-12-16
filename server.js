@@ -13,18 +13,55 @@ app.use(cors({optionSuccessStatus: 200}));  // some legacy browsers choke on 204
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 
-// http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/index.html');
+app.route('/')
+  .get(function (req, res) {
+    res.sendFile(process.cwd() + '/views/index.html');
+  });
+    
+app.route('/api/timestamp/:date?')
+  .get(function (req, res){
+    
+    let date = null;
+    // parse the date string
+    if (req.params.date !== undefined) {
+
+      // check if it is a unix timestamp...
+      const unixTimestamp = parseInt(req.params.date*1);
+      if (isNaN(unixTimestamp)) {
+        
+        // it's not a unix timestamp string
+        date = new Date(req.params.date);
+      } else {
+        
+        // it is a timestamp
+        date = new Date(unixTimestamp);
+      }
+      
+    } else {
+      
+      // the date string parameter is empty. 
+      // create a new date based on current time 
+      date = new Date(Date.now());
+    }
+    
+    // Initialize the response object, if Date is invalid
+    // this one will be returned
+
+    const response = date == "Invalid Date" ? 
+      { error: "Invalid Date" } :
+      { "unix": date.getTime(),
+        "utc": date.toUTCString()
+      };
+    
+    res.json(response);
+  });
+    
+// 404 Not Found Middleware
+app.use(function(req, res, next) {
+  res.status(404)
+    .type('text')
+    .send('Not Found');
 });
-
-
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
-});
-
-
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {
