@@ -1,17 +1,13 @@
-// server.js
-// where your node app starts
+'use strict';
+require('dotenv').config();
+const express = require('express');
+const app = express();
 
-// init project
-var express = require('express');
-var app = express();
+const cors = require('cors');
 
-// enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-// so that your API is remotely testable by FCC 
-var cors = require('cors');
-app.use(cors({optionSuccessStatus: 200}));  // some legacy browsers choke on 204
+app.use(cors());
 
-// http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
+app.use('/public', express.static(process.cwd() + '/public'));
 
 app.route('/')
   .get(function (req, res) {
@@ -63,7 +59,8 @@ app.use(function(req, res, next) {
     .send('Not Found');
 });
 
-// listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+app.listen(process.env.PORT || 3000, function () {
+  console.log(`Listening on port ${process.env.PORT}`);
 });
+
+module.exports = app; // for testing
